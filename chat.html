@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat Twitch Fugu</title>
+  <style>
+    body {
+      background-color: transparent;
+      color: white;
+      font-family: sans-serif;
+      font-size: 16px;
+    }
+    .message {
+      margin-bottom: 5px;
+    }
+    img.badge {
+      height: 18px;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+    .username {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tmi.js@1.8.5"></script>
+  <script>
+    const client = new tmi.Client({
+      channels: ['fugu_fps']
+    });
+
+    client.connect();
+
+    client.on('message', (channel, tags, message, self) => {
+      const chat = document.getElementById('chat');
+
+      const div = document.createElement('div');
+      div.className = 'message';
+
+      // Badges
+      let badgesHTML = '';
+      if (tags.badges) {
+        for (const [badge, version] of Object.entries(tags.badges)) {
+          const url = `https://static-cdn.jtvnw.net/badges/v1/${badge}/${version}/default/light/1`;
+          badgesHTML += `<img class="badge" src="https://static-cdn.jtvnw.net/badges/v1/${badge}/${version}/1" alt="${badge}">`;
+        }
+      }
+
+      // Username + message
+      div.innerHTML = `${badgesHTML}<span class="username" style="color: ${tags['color'] || '#fff'}">${tags['display-name']}</span>: ${message}`;
+
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    });
+  </script>
+</body>
+</html>
